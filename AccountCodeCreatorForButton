@@ -1,0 +1,60 @@
+var codeList = [];
+var codeControl = this.recordService.component.allFormControls.KODU.value;
+var codeLast = '';
+if (codeControl === undefined || codeControl == '' || codeControl == null) {
+	this.recordService.component.allFormControls.KODU.setValue('')
+} else {
+	this.recordService.component.api.select({
+		Object: 'MUH_HESAP',
+		Where: [{
+				Column: 'KODU',
+				Operator: 'LIKE',
+				Value: codeControl + '.%'
+			}
+		],
+		Paging: {
+			ItemsPerPage: 10000,
+			Current: 1
+		},
+		Select: ['KODU']
+	}).then(function (response) {
+		for (var i = 0; i < response.ResultSets[0].length; i++) {
+			codeList.push(response.ResultSets[0][i].KODU)
+		}
+		if (!codeList.length) {
+			codeLast = codeControl + '.001'
+			let split = String(codeControl).split('.');
+			let last = split[split.length - 1];
+			let find = last.match(/\\d+$/);
+			if (find == null) {
+				last = last + '.001'
+			} else {
+				let next = String(parseInt(find[0]) + 1);
+				last = last.substr(0, find.index) + Array.from({
+						length: find[0].length - next.length
+					}).map(() => '0').join('') + next
+			}
+			split.splice(split.length - 1, 1, last);
+			codeLast = split.join('.')
+		} else {
+			codeList = codeList.sort((a, b) => a > b ? -1 : 1);
+			let split = String(codeList[0]).split('.');
+			let last = split[split.length - 1];
+			let find = last.match(/\\d+$/);
+			if (find == null) {
+				last = last + '.001'
+			} else {
+				let next = String(parseInt(find[0]) + 1);
+				last = last.substr(0, find.index) + Array.from({
+						length: find[0].length - next.length
+					}).map(() => '0').join('') + next
+			}
+			split.splice(split.length - 1, 1, last);
+			codeLast = split.join('.')
+		}
+	});
+	setTimeout(function () {
+		this.recordService.component.allFormControls.KODU.setValue(codeLast)
+	}
+		.bind(this), 1000)
+}
