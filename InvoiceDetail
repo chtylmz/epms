@@ -10,11 +10,58 @@ if (params.column.colId == 'STOKID') {
 		Select: ['BFIYAT', 'SBIRIMI']
 	}).then(r => {
 		console.log(r.ResultSets[0]);
-		params.data.BFIYAT = r.ResultSets[0][0].BFIYAT;
-		params.data.FBFIYAT = r.ResultSets[0][0].BFIYAT;
-		params.data.BIRIM = r.ResultSets[0][0].SBIRIMI
+		if(r.ResultSets[0].length > 0){
+			params.data.BFIYAT = r.ResultSets[0][0].BFIYAT;
+			params.data.FBFIYAT = r.ResultSets[0][0].BFIYAT;
+			params.data.FBIRIM = r.ResultSets[0][0].SBIRIMI			
+		}
+
 	})
 };
+if (params.column.colId == 'FBIRIM_BIRIM') {
+	this.api.select({
+		Object: 'STOK',
+		Where: [{
+				Column: 'STOKID',
+				Operator: '=',
+				Value: params.data.STOKID
+			}
+		],
+		Select: ['BFIYAT', 'BIRIM','BIRIM2','BIRIM3','BIRIM4','KATSAYI2','KATSAYI3','KATSAYI4','SALISFIYAT','SALISBFIYAT','SFIYAT1']
+	}).then(r => {
+		var sira= '';
+		var katSayi = 1;
+		
+		 if(r.ResultSets[0][0].BIRIM == params.data.FBIRIM ){
+			 sira= '';
+		 }
+		 else if(r.ResultSets[0][0].BIRIM2 == params.data.FBIRIM ){
+			 sira= '2';
+		 }
+		 else if(r.ResultSets[0][0].BIRIM3 == params.data.FBIRIM ){
+			 sira= '3';
+		 }
+		 else if(r.ResultSets[0][0].BIRIM4 == params.data.FBIRIM ){
+			 sira= '4';
+		 }
+		
+		 if(sira == ''){
+			 katSayi = 1;
+		 }
+		 else{
+			 katSayi = r.ResultSets[0][0]['KATSAYI'+ sira];
+		 }
+		
+		 if(katSayi == 0)
+			 katSayi = 1;
+		console.log(katSayi);		
+		console.log(sira);	
+			
+		 params.data.ADET = params.data.FADET * katSayi;
+
+	})
+};
+
 if (params.column.colId == 'FADET') {
 	params.data.ARATOPLAM = RoundBanker(params.data.FADET * params.data.FBFIYAT, 2);
 	params.data.DTOPLAM = RoundBanker(params.data.FADET * params.data.DBFIYAT, 2);
