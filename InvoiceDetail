@@ -13,12 +13,11 @@ if (params.column.colId == 'STOKID') {
 		if(r.ResultSets[0].length > 0){
 			params.data.BFIYAT = r.ResultSets[0][0].BFIYAT;
 			params.data.FBFIYAT = r.ResultSets[0][0].BFIYAT;
-			params.data.FBIRIM = r.ResultSets[0][0].SBIRIMI			
 		}
 
 	})
 };
-if (params.column.colId == 'FBIRIM_BIRIM') {
+if (params.column.colId == 'FADET' || params.column.colId == 'ADET' || params.column.colId == 'FBIRIM') {
 	this.api.select({
 		Object: 'STOK',
 		Where: [{
@@ -56,8 +55,13 @@ if (params.column.colId == 'FBIRIM_BIRIM') {
 			 katSayi = 1;
 		console.log(katSayi);		
 		console.log(sira);	
-			
-		 params.data.ADET = params.data.FADET * katSayi;
+		
+		if (params.column.colId == 'ADET'){
+		 params.data.FADET = params.data.ADET / katSayi }
+		 else
+		 {
+		 params.data.ADET = params.data.FADET * katSayi};
+		 
 
 	})
 };
@@ -65,10 +69,31 @@ if (params.column.colId == 'FBIRIM_BIRIM') {
 if (params.column.colId == 'FADET') {
 	params.data.ARATOPLAM = RoundBanker(params.data.FADET * params.data.FBFIYAT, 2);
 	params.data.DTOPLAM = RoundBanker(params.data.FADET * params.data.DBFIYAT, 2);
+	
+	console.log('start');
+	console.log(params.data.FADET);
+	console.log(params.data.FBFIYAT);
+	console.log(params.data.ADET);
+	console.log('end');
+	params.data.BFIYAT = RoundBanker((params.data.FADET * params.data.FBFIYAT)/params.data.ADET, 2);
+	
+	
+	
 };
 if (params.column.colId == 'ADET') {
 	params.data.ARATOPLAM = RoundBanker(params.data.ADET * params.data.BFIYAT, 2);
 	params.data.DTOPLAM = RoundBanker(params.data.ADET * params.data.DBFIYAT, 2);
+	params.data.FBFIYAT = params.data.ARATOPLAM / params.data.FADET;
+};
+
+if (params.column.colId == 'FBFIYAT') {
+	if (params.data.ADET != 0){
+	params.data.BFIYAT = RoundBanker((params.data.FADET * params.data.FBFIYAT)/params.data.ADET, 2);
+	}
+	else
+	{
+	params.data.BFIYAT = params.data.FBFIYAT
+	}
 };
 
 if (params.column.colId == 'BFIYAT') {
@@ -251,6 +276,10 @@ if (params.data.FADET == undefined) {
 	params.data.FADET = 1
 }
 
+if (params.data.ADET == undefined) {
+	params.data.ADET = params.data.FADET
+}
+
 this.recordService['abc']();
 this.changeCellValue(params.node, 'ARATOPLAM', params.data.ARATOPLAM);
 this.changeCellValue(params.node, 'NETTOPLAM', params.data.NETTOPLAM);
@@ -264,4 +293,3 @@ this.changeCellValue(params.node, 'BFIYAT', params.data.BFIYAT);
 this.changeCellValue(params.node, 'FBFIYAT', params.data.FBFIYAT);
 this.changeCellValue(params.node, 'ADET', params.data.ADET);
 this.changeCellValue(params.node, 'FADET', params.data.FADET);
-;
